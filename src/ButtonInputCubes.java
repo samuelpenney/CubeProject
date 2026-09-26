@@ -21,11 +21,13 @@ public class ButtonInputCubes {
             JButton secondViewButton = new JButton("Second View");
             JButton thirdViewButton = new JButton("Third View");
             JButton spinButton = new JButton("Spin");
+            JButton randomizeButton = new JButton("Randomize");
 
             controlPanel.add(firstViewButton);
             controlPanel.add(secondViewButton);
             controlPanel.add(thirdViewButton);
             controlPanel.add(spinButton);
+            controlPanel.add(randomizeButton);
 
             JPanel movePanel = new JPanel();
             JButton U = new JButton("U");
@@ -92,6 +94,7 @@ public class ButtonInputCubes {
             LPrime.addActionListener(e -> renderer.applyMove("L'"));
             FPrime.addActionListener(e -> renderer.applyMove("F'"));
             BPrime.addActionListener(e -> renderer.applyMove("B'"));
+            randomizeButton.addActionListener(e -> renderer.randomThis());
 
             firstViewButton.addActionListener(e -> renderer.firstView());
             secondViewButton.addActionListener(e -> renderer.secondView());
@@ -112,6 +115,13 @@ public class ButtonInputCubes {
             char[][][] cube = App.cube;
             synchronized (cube) {
                 App.applyMove(cube, move);
+            }
+        }
+
+        public void randomThis() {
+            char[][][] cube = App.cube;
+            synchronized (cube) {
+                App.RandomizeCube(cube, 20);
             }
         }
 

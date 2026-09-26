@@ -1,7 +1,14 @@
 {
-    "java.project.sourcePaths": ["src"],
-    "java.project.outputPath": "bin",
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar"
-    ]
+  "java.project.sourcePaths": ["src"],
+  "java.project.outputPath": "bin",
+  "java.project.referencedLibraries": [
+    "lib/jogamp-all-platforms/jar/jogl-all-2.6.0.jar",
+    "lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0.jar",
+    "lib/jogamp-all-platforms/jar/jogl-all-2.6.0-natives-macosx-universal.jar",
+    "lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0-natives-macosx-universal.jar"
+  ],
+  "java.debug.settings.vmArgs": "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
+  "code-runner.executorMap": {
+    "java": "cd \"$workspaceRoot\" && javac -cp \"lib/jogamp-all-platforms/jar/jogl-all-2.6.0.jar:lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0.jar\" -d bin src/*.java && java --add-exports=java.desktop/sun.awt=ALL-UNNAMED -cp \"bin:lib/jogamp-all-platforms/jar/jogl-all-2.6.0.jar:lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0.jar:lib/jogamp-all-platforms/jar/jogl-all-2.6.0-natives-macosx-universal.jar:lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0-natives-macosx-universal.jar\" \"$fileNameWithoutExt\""
+  }
 }

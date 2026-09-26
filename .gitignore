@@ -19,6 +19,12 @@
 *.tar.gz
 *.rar
 
+# JOGL 2.6.0 runtime dependencies for macOS
+!lib/jogamp-all-platforms/jar/jogl-all-2.6.0.jar
+!lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0.jar
+!lib/jogamp-all-platforms/jar/jogl-all-2.6.0-natives-macosx-universal.jar
+!lib/jogamp-all-platforms/jar/gluegen-rt-2.6.0-natives-macosx-universal.jar
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*

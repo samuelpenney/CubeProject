@@ -178,57 +178,109 @@ public class App {
     }
 
     public static void applyMove(char[][][] cube, String move) {
+        int face;
         switch (move) {
-            case "U":
-                Rotate(cube[TOP]);
-                Turn(cube[SOUTH], cube[EAST], cube[NORTH], cube[WEST], 1);
-                break;
-            case "U'":
-                RotateCounter(cube[TOP]);
-                TurnCounter(cube[SOUTH], cube[EAST], cube[NORTH], cube[WEST], 1);
-                break;
-            case "D":
-                Rotate(cube[BOTTOM]);
-                Turn(cube[SOUTH], cube[EAST], cube[NORTH], cube[WEST], 3);
-                break;
-            case "D'":
-                RotateCounter(cube[BOTTOM]);
-                TurnCounter(cube[SOUTH], cube[EAST], cube[NORTH], cube[WEST], 3);
-                break;
-            case "R":
-                Rotate(cube[EAST]);
-                Turn(cube[SOUTH], cube[TOP], cube[NORTH], cube[BOTTOM], 2);
-                break;
-            case "R'":
-                RotateCounter(cube[EAST]);
-                TurnCounter(cube[SOUTH], cube[TOP], cube[NORTH], cube[BOTTOM], 2);
-                break;
-            case "L":
-                Rotate(cube[WEST]);
-                Turn(cube[SOUTH], cube[BOTTOM], cube[NORTH], cube[TOP], 4);
-                break;
-            case "L'":
-                RotateCounter(cube[WEST]);
-                TurnCounter(cube[SOUTH], cube[BOTTOM], cube[NORTH], cube[TOP], 4);
-                break;
-            case "F":
-                Rotate(cube[SOUTH]);
-                Turn(cube[TOP], cube[EAST], cube[BOTTOM], cube[WEST], 2);
-                break;
-            case "F'":
-                RotateCounter(cube[SOUTH]);
-                TurnCounter(cube[TOP], cube[EAST], cube[BOTTOM], cube[WEST], 2);
-                break;
-            case "B":
-                Rotate(cube[NORTH]);
-                Turn(cube[TOP], cube[WEST], cube[BOTTOM], cube[EAST], 4);
-                break;
-            case "B'":
-                RotateCounter(cube[NORTH]);
-                TurnCounter(cube[TOP], cube[WEST], cube[BOTTOM], cube[EAST], 4);
-                break;
+            case "U": case "U'": face = TOP; break;
+            case "D": case "D'": face = BOTTOM; break;
+            case "B": case "B'": face = NORTH; break;
+            case "F": case "F'": face = SOUTH; break;
+            case "L": case "L'": face = WEST; break;
+            case "R": case "R'": face = EAST; break;
             default:
                 return;
+        }
+
+        int layer = face == TOP || face == EAST || face == SOUTH ? 1 : -1;
+        int turns = move.endsWith("'") ? layer : -layer;
+        char[][][] turnedCube = new char[cube.length][3][3];
+
+        for (int sourceFace = 0; sourceFace < cube.length; sourceFace++) {
+            for (int row = 0; row < 3; row++) {
+                for (int column = 0; column < 3; column++) {
+                    int[] position = faceletPosition(sourceFace, row, column);
+                    int[] normal = faceNormal(sourceFace);
+                    if (position[faceAxis(face)] == layer) {
+                        rotateClockwise(position, faceAxis(face), turns);
+                        rotateClockwise(normal, faceAxis(face), turns);
+                    }
+                    int destinationFace = faceFromNormal(normal);
+                    int[] destination = faceletIndex(destinationFace, position);
+                    turnedCube[destinationFace][destination[0]][destination[1]] = cube[sourceFace][row][column];
+                }
+            }
+        }
+
+        for (int faceIndex = 0; faceIndex < cube.length; faceIndex++) {
+            for (int row = 0; row < 3; row++) {
+                System.arraycopy(turnedCube[faceIndex][row], 0, cube[faceIndex][row], 0, 3);
+            }
+        }
+    }
+
+    private static int faceAxis(int face) {
+        return face == WEST || face == EAST ? 0 : face == TOP || face == BOTTOM ? 1 : 2;
+    }
+
+    private static int[] faceNormal(int face) {
+        switch (face) {
+            case TOP: return new int[] {0, 1, 0};
+            case BOTTOM: return new int[] {0, -1, 0};
+            case NORTH: return new int[] {0, 0, -1};
+            case SOUTH: return new int[] {0, 0, 1};
+            case WEST: return new int[] {-1, 0, 0};
+            default: return new int[] {1, 0, 0};
+        }
+    }
+
+    private static int[] faceletPosition(int face, int row, int column) {
+        switch (face) {
+            case TOP: return new int[] {row - 1, 1, 1 - column};
+            case BOTTOM: return new int[] {row - 1, -1, column - 1};
+            case NORTH: return new int[] {row - 1, column - 1, -1};
+            case SOUTH: return new int[] {row - 1, column - 1, 1};
+            case WEST: return new int[] {-1, row - 1, column - 1};
+            default: return new int[] {1, row - 1, column - 1};
+        }
+    }
+
+    private static int faceFromNormal(int[] normal) {
+        if (normal[1] == 1) return TOP;
+        if (normal[1] == -1) return BOTTOM;
+        if (normal[2] == -1) return NORTH;
+        if (normal[2] == 1) return SOUTH;
+        if (normal[0] == -1) return WEST;
+        return EAST;
+    }
+
+    private static int[] faceletIndex(int face, int[] position) {
+        switch (face) {
+            case TOP: return new int[] {position[0] + 1, 1 - position[2]};
+            case BOTTOM: return new int[] {position[0] + 1, position[2] + 1};
+            case NORTH: case SOUTH: return new int[] {position[0] + 1, position[1] + 1};
+            case WEST: case EAST: return new int[] {position[1] + 1, position[2] + 1};
+            default: throw new IllegalArgumentException("Unknown face: " + face);
+        }
+    }
+
+    private static void rotateClockwise(int[] vector, int axis, int turns) {
+        for (int turn = 0; turn < (turns + 4) % 4; turn++) {
+            int x = vector[0];
+            int y = vector[1];
+            int z = vector[2];
+            switch (axis) {
+                case 0:
+                    vector[1] = -z;
+                    vector[2] = y;
+                    break;
+                case 1:
+                    vector[0] = z;
+                    vector[2] = -x;
+                    break;
+                default:
+                    vector[0] = -y;
+                    vector[1] = x;
+                    break;
+            }
         }
     }
 

@@ -1,9 +1,12 @@
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLJPanel;
+//import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 
 public class ButtonInputCubes {
@@ -11,7 +14,7 @@ public class ButtonInputCubes {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Button Input Cube");
             frame.setSize(1000, 600);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
             JPanel controlPanel = new JPanel();
             JButton firstViewButton = new JButton("First View");
@@ -53,7 +56,7 @@ public class ButtonInputCubes {
 
             GLProfile profile = GLProfile.getDefault();
             GLCapabilities capabilities = new GLCapabilities(profile);
-            GLCanvas canvas = new GLCanvas(capabilities);
+            GLJPanel canvas = new GLJPanel(capabilities);
             ButtonInputCubesRenderer renderer = new ButtonInputCubesRenderer();
             canvas.addGLEventListener(renderer);
 
@@ -62,7 +65,20 @@ public class ButtonInputCubes {
             frame.getContentPane().add(controlPanel, BorderLayout.SOUTH);
 
             Animator animator = new Animator(canvas);
-            animator.start();
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent event) {
+                    frame.setEnabled(false);
+                    Thread shutdownThread = new Thread(() -> {
+                        try {
+                            animator.stop();
+                        } finally {
+                            SwingUtilities.invokeLater(frame::dispose);
+                        }
+                    }, "cube-animation-shutdown");
+                    shutdownThread.start();
+                }
+            });
 
             U.addActionListener(e -> renderer.applyMove("U"));
             D.addActionListener(e -> renderer.applyMove("D"));
@@ -83,6 +99,7 @@ public class ButtonInputCubes {
             spinButton.addActionListener(e -> renderer.spin());
 
             frame.setVisible(true);
+            animator.start();
         });
     }
 
